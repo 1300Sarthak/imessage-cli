@@ -53,7 +53,7 @@ There is no public Node.js API to resolve phone numbers to names efficiently.
 1.  Clone the repo:
 
     ```bash
-    git clone https://github.com/CamHenlin/imessageclient.git
+    git clone https://github.com/1300Sarthak/imessage-cli
     cd imessageclient
     ```
 
@@ -66,7 +66,7 @@ There is no public Node.js API to resolve phone numbers to names efficiently.
 3.  **Grant Permissions (Crucial step!)**:
 
     - Open **System Settings** -> **Privacy & Security** -> **Full Disk Access**.
-    - Enable **Terminal** (or **iTerm2** / **Cursor**).
+    - Enable **Terminal** (or **iTerm2**).
     - _Restart your terminal completely._
 
 4.  Run it:
@@ -83,4 +83,4 @@ There is no public Node.js API to resolve phone numbers to names efficiently.
 
 ---
 
-_Original project by Cam Henlin. Modernized for 2026 by Sarthak._
+_Original project by Cam Henlin. Modernized for Apple Architecture by Sarthak Sethi._

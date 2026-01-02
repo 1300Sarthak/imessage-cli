@@ -1,45 +1,86 @@
-# terminal-based iMessage client for Mac OS X
+# iMessage Client (2026 Modernization)
 
-note: if you would like a web-based iMessage client, check out [iMessageWebClient](https://github.com/CamHenlin/iMessageWebClient)
-or if you would like to run an iMessage bot, check out [iMessageBot](https://github.com/CamHenlin/imessagebot)
+A modern, terminal-based iMessage client for macOS, rebuilt for **Apple Silicon (M1/M2/M3)** and **macOS Ventura/Sonoma/Sequoia**.
 
-![iMessage client screenshot](https://github.com/CamHenlin/imessageclient/raw/master/screenshot.png "screenshot of the iMessage client in action")
+![iMessage client screenshot](screenshot.png)
 
-## requirements:
-- nodejs
-- Apple iMessages account signed in to Messages.app
+## 🚀 What's New
 
-## How to run on your Mac:
-Firstly, at the very minimum, you will have to enable assistive access to Terminal.app or iTerm2. If you want to run this over ssh, you will also need to enable access to sshd-keygen-wrapper. Next:
-```bash
-git clone https://github.com/CamHenlin/imessageclient.git
+This project is a modernization of a decade-old tool, updated to work in the strict security environment of modern macOS.
 
-cd imessageclient
+- **Architecture**: Dropped deprecated dependencies (`exec`, old `sqlite3`). Now uses native Node.js `child_process` and updated bindings.
+- **UI Overhaul**: A complete redesign using `blessed` with a 2-column layout (Chats | Conversation + Input).
+- **Native Compatibility**: Runs natively on Apple Silicon (ARM64).
+- **Rich Text Support**: Implements a custom heuristic parser to decode the binary `attributedBody` blobs that Apple now uses for message storage, stripping away binary artifacts to reveal readable text.
+- **Inline Images**: Supports the **iTerm2 Inline Image Protocol** to render received photos directly in your terminal.
 
-npm install
+## 🛠️ Challenges & Solutions
 
-node app
-```
+### 1. The "Full Disk Access" Wall
 
-## How to use:
-- After starting, you should see your existing conversations on the right. Select one by pressing the up and down arrows, then press enter to load the conversation.
-- Once you have loaded a conversation, press the tab key to select the text entry field and type whatever you want to say.
-- Once you are ready to send your message, press the enter key. You should see the Messages app flash for a moment and send your message and then you should see it appear in the terminal.
-- In the text entry field, if you press tab, you will be brought back to the conversation selection list so you can select another conversation.
-- When you are selecting conversation, you can press the Q key to quit
-- To start a new conversation, press the N key while the message list is selected. To cancel, press escape.
-- You can toggle other services that you might have enabled in your Messages client by hitting the R button with the contact list selected
-- Press E button with contacts list highlighted to send an enter command to Messages.app, useful if it looks like your messages aren't being sent and you're running over ssh, clears most Messages.app dialogs and errors
+Modern macOS (13+) sandboxes user data aggressively. Even `root` cannot read `~/Library/Messages` without explicit permission.
 
-## This is clunky!
-It seems to me that there is a way to access private APIs within OS X to send messages without the use of Messages.app, but I haven't figured out how to do so yet. Maybe you can help out and contribute? You can make this less clunky by helping out with this project [nodeprivatemessageskit](https://github.com/camhenlin/nodeprivatemessageskit)
+- **Solution**: The app now detects permission failures and guides you to grant **Full Disk Access** to your Terminal/Cursor application.
 
-## Why did you make this?
-Why not?
+### 2. The "Binary Blob" Nightmare
 
+Apple moved away from simple text columns to `attributedBody`—a serialized binary blob (NSKeyedArchiver) containing formatting, timestamps, and metadata.
 
-Sister project is available at: [iMessageWebClient](https://github.com/CamHenlin/iMessageWebClient)
+- **Solution**: We reverse-engineered the blob format to surgically extract the text content while stripping out CoreData artifacts (`streamtyped`, `NSObject`, etc.) and system noise.
 
-Uses [iMessageModule](https://github.com/CamHenlin/iMessageModule).
+### 3. Contact Resolution
 
-![made with a mac](http://henlin.org/mac.gif "made with a mac")
+There is no public Node.js API to resolve phone numbers to names efficiently.
+
+- **Solution**: We directly query the macOS AddressBook SQLite database (`AddressBook-v22.abcddb`) with a smart caching layer to resolve contact names instantly.
+
+## 🔮 Future Goals
+
+- **Global CLI Tool**: Package this as a global binary (`npm install -g imessage-cli`) so you can type `imessage` anywhere.
+- **ASCII Image Fallback**: For terminals that don't support the iTerm2 protocol, convert images to high-res ASCII/ANSI art.
+- **Interactive Notifications**: System notifications for new messages with "Quick Reply" support.
+- **Group Chat Management**: Better support for naming group chats and managing participants.
+
+## 📦 How to Run
+
+### Prerequisites
+
+- Node.js v20+
+- **iTerm2** (Recommended for image support) or any modern terminal.
+
+### Installation
+
+1.  Clone the repo:
+
+    ```bash
+    git clone https://github.com/CamHenlin/imessageclient.git
+    cd imessageclient
+    ```
+
+2.  Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3.  **Grant Permissions (Crucial step!)**:
+
+    - Open **System Settings** -> **Privacy & Security** -> **Full Disk Access**.
+    - Enable **Terminal** (or **iTerm2** / **Cursor**).
+    - _Restart your terminal completely._
+
+4.  Run it:
+    ```bash
+    npm start
+    ```
+
+## ⌨️ Controls
+
+- **Up/Down**: Navigate conversation list.
+- **Enter**: Select a chat / Send a message.
+- **Tab**: Toggle focus between conversation list and input box.
+- **Esc**: Unfocus.
+
+---
+
+_Original project by Cam Henlin. Modernized for 2026 by Sarthak._
